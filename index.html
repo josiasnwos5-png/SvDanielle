@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>💌 Pour Danielle</title>
+  <style>
+    :root { --bg1:#ffdde1; --bg2:#ee9ca7; --card:#ffffffcc; --txt:#1f2937; --muted:#4b5563; }
+    body{
+      margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center;
+      font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Roboto,Arial,sans-serif;
+      background: linear-gradient(135deg, var(--bg1), var(--bg2));
+      color:var(--txt);
+      padding: 22px 0;
+    }
+    .card{
+      width:min(560px, 92vw);
+      background: var(--card);
+      backdrop-filter: blur(10px);
+      border-radius: 22px;
+      padding: 26px 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.18);
+      text-align:center;
+    }
+    .topEmoji{ font-size:42px; margin-bottom:8px; }
+    h1{ margin: 6px 0 8px; font-size: 26px; }
+    .subtitle{ margin: 0 0 14px; color:var(--muted); font-size: 15px; }
+    .bubble{
+      margin: 14px 0 12px;
+      padding: 14px 14px;
+      background:#fff;
+      border-radius: 16px;
+      font-size: 17px;
+      line-height:1.35;
+      text-align:left;
+    }
+    .progress{
+      display:flex; gap:6px; justify-content:center; margin: 10px 0 14px;
+    }
+    .dot{
+      width:9px; height:9px; border-radius:999px;
+      background: rgba(255,255,255,.55);
+      outline: 1px solid rgba(0,0,0,.06);
+    }
+    .dot.active{ background: rgba(255,59,106,.95); }
+    .btns{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top: 10px; }
+    button{
+      border:0; padding: 12px 18px; border-radius: 999px;
+      font-size: 16px; font-weight: 650;
+      cursor:pointer;
+      transition: transform .06s ease, opacity .2s ease;
+    }
+    button:active{ transform: scale(.98); }
+    .primary{ background:#ff3b6a; color:white; }
+    .ghost{ background:#111827; color:white; opacity:.92; }
+    .tiny{ margin-top:12px; font-size: 12px; opacity:.75; }
+    .valentineBox{
+      margin-top: 10px;
+      padding: 14px;
+      background:#fff;
+      border-radius: 16px;
+      font-size: 17px;
+      line-height:1.35;
+      display:none;
+      text-align:left;
+    }
+    .answerBtns{ display:none; gap:12px; justify-content:center; flex-wrap:wrap; margin-top: 12px; }
+    .yes{ background:#ff3b6a; color:white; }
+    .no{ background:#111827; color:white; }
+    .result{
+      margin-top: 14px;
+      font-size: 18px;
+      font-weight: 700;
+      display:none;
+    }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <div class="topEmoji" id="emoji">💌</div>
+    <h1 id="title">Hey Danielle…</h1>
+    <div class="subtitle" id="subtitle">J’ai un petit chemin à te faire lire (promis, c’est court).</div>
+
+    <div class="progress" id="progress"></div>
+
+    <div class="bubble" id="text"></div>
+
+    <div class="btns" id="navBtns">
+      <button class="ghost" id="backBtn">◀ Retour</button>
+      <button class="primary" id="nextBtn">Continuer ▶</button>
+    </div>
+
+    <div class="valentineBox" id="valentineBox"></div>
+
+    <div class="answerBtns" id="answerBtns">
+      <button class="yes" id="yesBtn">Ouiiiii 💘</button>
+      <button class="no" id="noBtn">Non 😅</button>
+    </div>
+
+    <div class="result" id="result"></div>
+    <div class="tiny" id="tiny">Tu peux relire ou avancer à ton rythme.</div>
+  </main>
+
+  <script>
+    // ✨ PERSONNALISATION RAPIDE ✨
+    // Remplace les phrases ci-dessous par les tiennes si tu veux.
+    // Astuce: garde chaque texte assez court pour être agréable sur mobile.
+
+    const steps = [
+      {
+        emoji: "🌸",
+        title: "Danielle",
+        subtitle: "Je voulais te dire un truc, calmement.",
+        text: "Avec toi, je me sens bien. Pas juste sur le moment… mais profondément, comme si tout devenait plus simple."
+      },
+      {
+        emoji: "✨",
+        title: "Ce que j’aime chez toi",
+        subtitle: "C’est rare, et je le remarque.",
+        text: "J’aime ta façon d’être : ta douceur, ton énergie, et cette manière que tu as de rendre les choses plus lumineuses."
+      },
+      {
+        emoji: "🧠",
+        title: "Ce que tu m’apportes",
+        subtitle: "Et ce que j’ai envie de construire.",
+        text: "Tu me donnes envie d’être meilleur, de faire les choses sérieusement, et d’investir mon cœur sans jouer."
+      },
+      {
+        emoji: "🤝",
+        title: "Moi, avec toi",
+        subtitle: "Je veux être présent, vraiment.",
+        text: "Je veux te choisir, te respecter, t’écouter, et avancer avec toi dans une relation stable, saine et sincère."
+      },
+      {
+        emoji: "💖",
+        title: "Une petite promesse",
+        subtitle: "Simple, mais vraie.",
+        text: "Je ne te promets pas la perfection. Je te promets l’effort, l’honnêteté, la tendresse… et de te faire une place réelle."
+      },
+      {
+        emoji: "🌹",
+        title: "Alors…",
+        subtitle: "J’arrive à la question.",
+        text: "J’avais envie de te le dire d’une façon un peu différente… parce que tu comptes."
+      }
+    ];
+
+    // La question finale (tu peux modifier)
+    const finalQuestion = "Danielle, tu veux être ma Valentine ? 🌹💘";
+
+    // ---- UI logic ----
+    const emojiEl = document.getElementById("emoji");
+    const titleEl = document.getElementById("title");
+    const subtitleEl = document.getElementById("subtitle");
+    const textEl = document.getElementById("text");
+    const progressEl = document.getElementById("progress");
+    const backBtn = document.getElementById("backBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const navBtns = document.getElementById("navBtns");
+
+    const valentineBox = document.getElementById("valentineBox");
+    const answerBtns = document.getElementById("answerBtns");
+    const yesBtn = document.getElementById("yesBtn");
+    const noBtn = document.getElementById("noBtn");
+    const result = document.getElementById("result");
+    const tiny = document.getElementById("tiny");
+
+    let idx = 0;
+
+    function buildProgress() {
+      progressEl.innerHTML = "";
+      const total = steps.length + 1; // +1 for final
+      for (let i = 0; i < total; i++) {
+        const d = document.createElement("div");
+        d.className = "dot" + (i === idx ? " active" : "");
+        progressEl.appendChild(d);
+      }
+    }
+
+    function render() {
+      buildProgress();
+
+      // Final screen
+      if (idx === steps.length) {
+        emojiEl.textContent = "💘";
+        titleEl.textContent = "Dernière question…";
+        subtitleEl.textContent = "Je te la pose avec le cœur.";
+
+        textEl.style.display = "none";
+        navBtns.style.display = "none";
+        tiny.style.display = "none";
+
+        valentineBox.style.display = "block";
+        valentineBox.innerHTML = `<strong>${finalQuestion}</strong><br><br>
+          <span style="color:#4b5563;">(Promis, ça peut être simple : un petit moment tous les deux, et juste profiter.)</span>`;
+
+        answerBtns.style.display = "flex";
+        return;
+      }
+
+      // Steps screens
+      const s = steps[idx];
+      emojiEl.textContent = s.emoji;
+      titleEl.textContent = s.title;
+      subtitleEl.textContent = s.subtitle;
+      textEl.textContent = s.text;
+
+      textEl.style.display = "block";
+      navBtns.style.display = "flex";
+      tiny.style.display = "block";
+
+      valentineBox.style.display = "none";
+      answerBtns.style.display = "none";
+      result.style.display = "none";
+      yesBtn.disabled = false;
+      noBtn.disabled = false;
+
+      backBtn.style.display = idx === 0 ? "none" : "inline-block";
+      nextBtn.textContent = (idx === steps.length - 1) ? "Arriver à la question ▶" : "Continuer ▶";
+    }
+
+    backBtn.addEventListener("click", () => {
+      idx = Math.max(0, idx - 1);
+      render();
+    });
+
+    nextBtn.addEventListener("click", () => {
+      idx = Math.min(steps.length, idx + 1);
+      render();
+    });
+
+    // Answers
+    function show(msg){
+      result.textContent = msg;
+      result.style.display = "block";
+    }
+
+    yesBtn.addEventListener("click", () => {
+      show("Yesss 😍 Alors c’est un date ! 💖");
+      yesBtn.disabled = true;
+      noBtn.disabled = true;
+      confetti();
+    });
+
+    const noTexts = ["T’es sûre ? 🙃", "Re-réfléchis 😌", "Allez stp 🥺", "Dernière chance 😳", "Ok… mais non 😈"];
+    let n = 0;
+    noBtn.addEventListener("click", () => {
+      n = (n + 1) % noTexts.length;
+      noBtn.textContent = noTexts[n];
+      const dx = (Math.random() * 140) - 70;
+      const dy = (Math.random() * 80) - 40;
+      noBtn.style.transform = `translate(${dx}px, ${dy}px)`;
+      setTimeout(()=> noBtn.style.transform = "translate(0,0)", 400);
+    });
+
+    function confetti(){
+      const n = 80;
+      for(let k=0;k<n;k++){
+        const s = document.createElement("span");
+        s.textContent = ["💖","💘","✨","🌸","💕"][Math.floor(Math.random()*5)];
+        s.style.position="fixed";
+        s.style.left = Math.random()*100+"vw";
+        s.style.top  = "-10vh";
+        s.style.fontSize = (14+Math.random()*18)+"px";
+        s.style.zIndex = 9999;
+        s.style.transition = "transform 1.4s ease, opacity 1.4s ease";
+        document.body.appendChild(s);
+        requestAnimationFrame(()=>{
+          s.style.transform = `translateY(${110+Math.random()*40}vh) rotate(${Math.random()*360}deg)`;
+          s.style.opacity = "0";
+        });
+        setTimeout(()=> s.remove(), 1500);
+      }
+    }
+
+    render();
+  </script>
+</body>
+</html>
